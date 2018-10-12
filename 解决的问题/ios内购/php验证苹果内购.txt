@@ -1,0 +1,161 @@
+PHP处理苹果APP内购后到服务端的二次验证（项目经验）
+2018年04月27日 16:26:16
+
+
+一、苹果APP支付到服务端验证流程
+
+1. 用户在app中点击购买；
+
+2. app调用服务端接口生成订单；
+
+3. app获取到服务端订单生成成功后弹出支付窗口；
+
+4. 用户输入密码支付；
+
+5. app接收支付后apple应用商店返回的支付凭证；
+
+6. app将支付凭证传回服务器，调用服务器接口验证凭证是否有效；
+
+7. app获取服务器端的验证结果，反馈用户支付结果状态。
+
+说明：苹果支付的商品，需要先在 itunes Connect 中配置APP内购项目，配置后对应会生成一个商品ID，在苹果APP端调用苹果支付时，就需要给苹果商店传送这个商品ID（product_id）参数。然后支付过程是在苹果商店中进行，支付完成后，返回一个支付凭证给APP，表示支付完成，但一般会再次调用自己的服务器（商家服务器）端进行支付验证，这时候在服务器写个验证接口，判断凭证是否有效，如果有效，对应修改订单状态和购买的商品状态等等。
+
+二、凭证验证函数
+
+[php] view plain copy
+       /** 
+ * 验证AppStore内付 
+ * @param  string $receipt_data 付款后凭证 
+ * @return array                验证是否成功 
+ */  
+function validate_apple_pay($receipt_data)  
+{  
+    /** 
+     * 21000 App Store不能读取你提供的JSON对象 
+     * 21002 receipt-data域的数据有问题 
+     * 21003 receipt无法通过验证 
+     * 21004 提供的shared secret不匹配你账号中的shared secret 
+     * 21005 receipt服务器当前不可用 
+     * 21006 receipt合法，但是订阅已过期。服务器接收到这个状态码时，receipt数据仍然会解码并一起发送 
+     * 21007 receipt是Sandbox receipt，但却发送至生产系统的验证服务 
+     * 21008 receipt是生产receipt，但却发送至Sandbox环境的验证服务 
+     */  
+    function acurl($receipt_data, $sandbox=0){  
+        //小票信息  
+        $secret = "XXXXXXXXXXXXXXXXXXXX";    // <strong>APP固定密钥，在</strong><strong>itunes中获取</strong>  
+        $POSTFIELDS = array("receipt-data" => $receipt_data,'password'=>$secret);  
+        $POSTFIELDS = json_encode($POSTFIELDS);  
+   
+        //正式购买地址 沙盒购买地址  
+        $url_buy     = "https://buy.itunes.apple.com/verifyReceipt";  
+        $url_sandbox = "https://sandbox.itunes.apple.com/verifyReceipt";  
+        $url = $sandbox ? $url_sandbox : $url_buy;  
+   
+        //简单的curl  
+        $ch = curl_init($url);  
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);  
+        curl_setopt($ch, CURLOPT_POST, 1);  
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $POSTFIELDS);  
+        $result = curl_exec($ch);  
+        curl_close($ch);  
+        return $result;  
+    }  
+  
+    // 验证参数  
+    if (strlen($receipt_data)<20){  
+        $result=array(  
+            'status'=>false,  
+            'message'=>'非法参数'  
+            );  
+        return $result;  
+    }  
+    // 请求验证  
+    $html = acurl($receipt_data);  
+    $data = json_decode($html,true);  
+   
+    // 如果是沙盒数据 则验证沙盒模式  
+    if($data['status']=='21007'){  
+        // 请求验证  
+        $html = acurl($receipt_data, 1);  
+        $data = json_decode($html,true);  
+        $data['sandbox'] = '1';  
+    }  
+   
+    if (isset($_GET['debug'])) {  
+        exit(json_encode($data));  
+    }  
+       
+    // 判断是否购买成功  
+    if(intval($data['status'])===0){  
+        $result=array(  
+            'status'=>true,  
+            'message'=>'购买成功'  
+            );  
+    }else{  
+        $result=array(  
+            'status'=>false,  
+            'message'=>'购买失败 status:'.$data['status']  
+            );  
+    }  
+    return $result;  
+}  
+注意：验证函数中有一个密钥需要在 itunes 中获取。
+
+三、应用示范（ThinkPHP3.2控制器）
+
+[php] view plain copy
+public function verify()  
+{  
+    // 获取订单号  
+    $order_no = I('post.order_no');  
+    // 获取用户id  
+    $user_id  = I('post.uid');  
+    //苹果内购的验证收据  
+    $apple_receipt = I('post.apple_receipt');  
+    // 判断是否缺少参数  
+    if ( empty($order_no) || empty($user_id) || empty($apple_receipt) ) {  
+        $message = "缺少请求参数";  
+        $status = "400";  
+    } else {  
+        // 代码思路  
+        // 1. 判断订单是否存在并且有效  
+        // 2. 判断用户是否存在  
+        // 3. 调用苹果支付凭证验证函数  
+  
+        $verify_result = validate_apple_pay($apple_receipt);  
+  
+        // 4.判断验证结果  
+  
+        if( $apple_result['status'] ) {     // 凭证验证成功  
+  
+            // 其他code,修改订单状态、购买商品状态……  
+  
+            $message = "ok";  
+            $status  = "200";  
+        } else {                            // 凭证验证失败  
+            $status  = "401";  
+            $message = "验证失败";  
+        }  
+    }  
+    // 返回接口数据  
+    $result = array();  
+    if( !empty($apple_receipt) ) {  
+        $result['verify_result'] = $verify_result['message'];  
+        $result['apple_receipt'] = $apple_receipt;  
+    }  
+    $result['status']  = $status;  
+    $result['message'] = $message;  
+      
+    $this->response($result,'json');  //以json方式返回数据  
+}  
+四、参考文档
+
+1. HTTP标准状态码；
+
+2. 苹果内购买项目配置流程；
+
+3. http://www.cnblogs.com/zhaoqingqing/p/4589200.html
+
+4. https://www.cnblogs.com/zhaoqingqing/p/4597794.html
+
+5. iOS应用内支付（IAP）详解

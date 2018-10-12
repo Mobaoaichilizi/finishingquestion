@@ -1,0 +1,2 @@
+<think:cate result="vo" pid="28">
+</think:cate>

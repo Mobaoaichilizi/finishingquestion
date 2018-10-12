@@ -1,0 +1,34 @@
+//1-微信  2-支付宝
+if($pay_way=='2')
+		{
+			$order_sn=date("YmdHis").rand(10000,99999);
+			$arr['order_sn']=$order_sn;
+			$arr['subject']="用户充值";
+			$arr['money']=$pay_money;
+			$arr['body']=$id;
+		}else if($pay_way=='1')
+		{
+			$order_sn=date("YmdHis").rand(10000,99999).'_'.$id;
+			include_once(VENDOR_PATH . "Pay/weixin/lib/WxPay.Api.php");
+			include_once(VENDOR_PATH . "Pay/weixin/source/WxPay.AppPay.php");
+			$notify_url = "http://gz.51dade.com/Doctor/Payreturn/return_pay";
+			$notify = new \AppPay();
+			/*首先生成prepayid*/
+			$input = new \WxPayUnifiedOrder();
+			$input->SetBody("会员充值");//商品或支付单简要描述(必须填写)
+			$input->SetAttach("order");//附加数据，在查询API和支付通知中原样返回，该字段主要用于商户携带订单的自定义数据(不必填)
+			$input->SetOut_trade_no($order_sn);//订单号(必须填写)
+			$input->SetTotal_fee($pay_money * 100);//订单金额(必须填写
+			//$input->SetTotal_fee(0.01*100);//订单金额(必须填写))
+			//$input->SetTime_start(date("YmdHis"));//交易起始时间(不必填)
+			//$input->SetTime_expire(date("YmdHis",time()+600));//交易结束时间10分钟之内不必填)
+			//$input->SetGoods_tag("money_in");//商品标记(不必填)
+			$input->SetNotify_url($notify_url);//回调URL(必须填写)
+			$input->SetTrade_type("APP");//交易类型(必须填写)
+			//$input->SetProduct_id("123456789");//rade_type=NATIVE，此参数必传。此id为二维码中包含的商品ID，商户自行定义。
+			$order = \WxPayApi::unifiedOrder($input);//获得订单的基本信息，包括prepayid
+			$arr = $notify->GetAppApiParameters($order);//生成提交给app的一些参数
+			$arr['order_sn']=$order_sn;
+		}
+
+	echo json_encode($arr);

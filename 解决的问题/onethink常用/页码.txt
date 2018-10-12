@@ -1,0 +1,3 @@
+<article:page cate="$cat_id" listrow="$cateclass['list_row']" />
+     
+</article:page> 

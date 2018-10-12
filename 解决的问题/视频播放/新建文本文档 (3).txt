@@ -1,0 +1,12 @@
+			<div id="a1"></div>
+<script type="text/javascript" src="__JS__/ckplayer.js" charset="utf-8"></script>
+<script type="text/javascript">
+	var flashvars={
+		f:'__JS__/qyxc.flv',  //播放器的地址
+		c:0,
+		b:1,
+		i:'__IMG__/video.jpg'  //显示图片
+		};
+	var params={bgcolor:'#FFF',allowFullScreen:true,allowScriptAccess:'always',wmode:'transparent'};
+	CKobject.embedSWF('__JS__/ckplayer.swf','a1','ckplayer_a1','760','380',flashvars,params);
+  </script>

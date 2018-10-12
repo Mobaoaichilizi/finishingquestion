@@ -1,0 +1,109 @@
+admin 中的ArticleController
+
+
+文档在添加或者编辑的时候，点击确认和返回不跳转，因为cookie中未保存之前index的网址，$_SERVER["REQUEST_URI"] 算是经常用到的，但是这个变量只有 apache 才支持
+
+
+ // 记录当前列表页的cookie
+
+
+
+            // Cookie('__forward__',$_SERVER['REQUEST_URI']);
+            Cookie('__forward__',$_SERVER['SCRIPT_NAME']."?".$_SERVER['QUERY_STRING']);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+$_SERVER["REQUEST_URI"]函数
+2012年06月04日 11:26:48
+阅读数：19027
+转自：http://blog.163.com/wangzhenbo85@126/blog/static/10136328220112153725356/
+
+在 PHP 众多预定义服务器变量中，$_SERVER["REQUEST_URI"] 算是经常用到的，但是这个变量只有 apache 才支持，因此，我们需要一个更加通用的方式来获取 REQUEST_URI 的值，本文就是结束这一问题的解决方案。
+
+<?php
+ 
+// 说明：获取 _SERVER['REQUEST_URI'] 值的通用解决方案
+// 来源：drupal-5.1 bootstrap.inc
+// 整理：CodeBit.cn ( http://www.CodeBit.cn )
+ 
+function request_uri()
+{
+    if (isset($_SERVER['REQUEST_URI']))
+    {
+        $uri = $_SERVER['REQUEST_URI'];
+    }
+    else
+    {
+        if (isset($_SERVER['argv']))
+        {
+            $uri = $_SERVER['PHP_SELF'] .'?'. $_SERVER['argv'][0];
+        }
+        else
+        {
+            $uri = $_SERVER['PHP_SELF'] .'?'. $_SERVER['QUERY_STRING'];
+        }
+    }
+    return $uri;
+}
+ 
+?>
+
+
+$_SERVER[ "REQUEST_URI "]只在支持PATH_INFO的web服务器中可用 
+具体对php来讲就是apache下可用，php5中可用 
+
+另外$_SERVER只在php4.1.0以上可用
+
+
+
+$_SERVER["REQUEST_URI"]函数
+
+预定义服务器变量的一种，所有$_SERVER开头的都叫做预定义服务器变量 REQUEST_URI的作用是取得当前URI，也就是除域名外后面的完整的地址路径
+
+例如。当前页面是http://www.zixueku.com/plus/search.php?kwtype=0&keyword=php&searchtype=titlekeyword
+
+echo $_SERVER["REQUEST_URI"];
+
+结果就为：plus/search.php?kwtype=0&keyword=php&searchtype=titlekeyword
+
+
+
+
+
+假如命令行的地址是：http://www.baidu.com/index.php
+
+那么：
+
+$_SERVER['HTTP_HOST']＝＝'www.baidu.com'
+
+$_SERVER['PHP_SELF']＝＝'/index.php'
+
+明白了吧，一个是主机地址，一个是脚本文件的绝对路径
+
+
+“PHP_SELF” 
+当前正在执行脚本的文件名，与 document root 相关。举例来说，在 URL 地址为 http://www.jb51.net/test.php/foo.bar 的脚本中使用 $_SERVER['PHP_SELF'] 将会得到 /test.php/foo.bar 这个结果。__FILE__ 常量包含当前（例如包含）文件的绝对路径和文件名。 
+
+“SCRIPT_NAME” 
+包含当前脚本的路径。这在页面需要指向自己时非常有用。__FILE__ 包含当前文件的绝对路径和文件名（例如包含文件）。 
+
+主要的原因如像：$_SERVER['PHP_SELF'] ? $_SERVER['PHP_SELF'] : $_SERVER['SCRIPT_NAME']; 
+
+找到更好的原因是： 
+今天在Dreamhost上安裝一套PHP程序時發現連接的地址都會多出一個cgi-system來，但是程序的config並沒有問題，查了查資料才發現是SCRIPT_NAME和PHP_SELF不同造成的問題。 
+通常在本機測試 $_SERVER['SCRIPT_NAME'] 跟 $_SERVER['PHP_SELF'] 大概看不出有什麼不同，因為大部分的PHP不是以CGI模式運行的。 
+但 DreamHost 上的 PHP 是以 CGI 方式運行，二者就有明顯不同的差異。 
+echo $_SERVER['SCRIPT_NAME']; // (/cgi-system/php.cgi) 
+echo $_SERVER['PHP_SELF']; // (/admin/test.php) 

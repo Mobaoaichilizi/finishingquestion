@@ -1,0 +1,4 @@
+<article:position name="list" cate="66" limit="1" pos="2">//第一个参数$v,第二个参数id,第三个参数截取，第四个参数推荐位置
+   
+   ...          
+</article:position>

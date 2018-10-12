@@ -1,0 +1,45 @@
+
+ <script type="text/javascript" src="__JS__/jquery.chained.js"></script>
+ <li class="inp1">
+
+                                <select id="department" name="department" class="dxb_se">
+
+                                    <php>$department=M('Category')->where("pid=28")->order('sort asc')->select();</php>
+
+                                        <option value="0">—°‘Ò‘∫œµ</option>
+
+                                        <volist name="department" id="pvo">
+
+                                            <option value="{$pvo.id}">{$pvo.title}</option>
+
+                                        </volist>
+
+                                </select>
+
+                            </li>
+
+                            <li class="inp1">
+
+                                <select id="majors" name="majors" class="dxb_se">
+
+                                    <php>$department=M('Category')->where("pid=28")->order('sort asc')->select();</php>
+
+                                    <volist name="department" id="pvo">
+
+                                        <php>$majors=M('Document')->where("status = 1 and category_id=".$pvo['id'])->order('level desc')->select();</php>
+
+                                        <volist name="majors" id="cvo">
+
+                                            <option value="{$cvo.id}" class="{$pvo.id}">{$cvo.title}</option>
+
+                                        </volist>
+
+                                    </volist>
+
+                                </select>
+
+                            </li>
+<script type="text/javascript">
+                  
+	 $("#majors").chained("#department");
+</script>

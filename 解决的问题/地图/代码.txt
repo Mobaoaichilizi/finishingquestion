@@ -1,0 +1,26 @@
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=8hawtXTf423cdezdv0VvH6QlmYGAIpgz"></script>
+
+ <script type="text/javascript">
+	// 百度地图API功能
+	var map = new BMap.Map("allmap");            
+	map.centerAndZoom("西安",12);  
+	 var navigationControl = new BMap.NavigationControl({
+    // 靠左上角位置
+    anchor: BMAP_ANCHOR_TOP_LEFT,
+    // LARGE类型
+    type: BMAP_NAVIGATION_CONTROL_LARGE,
+    // 启用显示定位
+    enableGeolocation: true
+	  });
+	  map.addControl(navigationControl);         
+	//单击获取点击的经纬度
+	
+	map.addEventListener("click",function(e){
+		map.clearOverlays(); 
+		var marker = new BMap.Marker(new BMap.Point(e.point.lng,e.point.lat));
+		$('#lng').val(e.point.lng);
+		$('#lat').val(e.point.lat);
+		map.addOverlay(marker);
+	});
+	
+</script>

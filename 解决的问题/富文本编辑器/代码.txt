@@ -1,0 +1,23 @@
+<textarea  class="form-control" style="width:100%; height:350px;" name="content" id="content"></textarea>
+
+<script>
+    var editor;
+    KindEditor.ready(function(K) {
+        editor = K.create('textarea[name="content"]', {
+            afterBlur: function () { this.sync();},
+            resizeType : 1,
+            allowPreviewEmoticons : false,
+            allowImageUpload : true,
+            items : [
+                'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline',
+                'removeformat','plainpaste', '|', 'justifyleft', 'justifycenter', 'justifyright', 'insertorderedlist',
+                'insertunorderedlist', '|', 'emoticons', 'image', 'link','multiimage'],
+            
+        });
+       
+        
+        
+    });
+</script>
+<script type="text/javascript" src="__PUB__/kindeditor/kindeditor-min.js"></script>
+<script type="text/javascript" src="__PUB__/kindeditor/zh_CN.js"></script>

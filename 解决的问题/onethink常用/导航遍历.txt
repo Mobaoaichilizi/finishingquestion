@@ -1,0 +1,23 @@
+<think:nav name="nav" tree="true">
+
+            <li class="child"><a style='' href="{:U($nav['url'])}"> <p class="title">{$nav.title}</p></a>
+                <if condition="is_array($nav['_'])">
+
+                    <ul class="childContent">
+
+                        <volist name="nav['_']" id="vo">
+
+                            <a href="{:U($vo['url'])}"><li class="childContentLi">{$vo.title}</li></a>
+
+                        </volist>
+
+                    </ul>
+
+                </if>
+
+           
+
+            </li>
+
+
+        </think:nav> 

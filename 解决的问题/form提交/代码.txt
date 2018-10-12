@@ -1,0 +1,17 @@
+<script language="javascript">  
+    $("#form1").submit(function(){//formµÄid
+      var self = $(this);
+      $.post(self.attr("action"), self.serialize(), success, "json");//formÒªÓÐaction
+      return false;
+      function success(data){
+        if(data.status){
+          alert(data.info);
+          window.location.reload();
+        } else {
+
+          alert(data.info);
+        }
+
+      }
+    });
+</script>

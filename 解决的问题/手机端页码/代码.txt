@@ -1,0 +1,2 @@
+<article:wappage cate="$cat_id" listrow="$cateclass['list_row']" />
+//²é¿´ÔÚ Core\Library\OT\TagLib

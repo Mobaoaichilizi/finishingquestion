@@ -1,0 +1,46 @@
+//极光推送
+function jpush_request_post($url="",$param="",$header="")
+{
+	if (empty($url)||empty($param))
+	{
+		return false;
+	}
+	$postUrl = $url;
+	$curlPost = $param;
+	$ch = curl_init();//初始化curl
+	curl_setopt($ch, CURLOPT_URL,$postUrl);//抓取指定网页
+	curl_setopt($ch, CURLOPT_HEADER, 0);//设置header
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);//要求结果为字符串且输出到屏幕上
+	curl_setopt($ch, CURLOPT_POST, 1);//post提交方式
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $curlPost);
+	curl_setopt($ch, CURLOPT_HTTPHEADER,$header);
+	// 增加 HTTP Header（头）里的字段 
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+	// 终止从服务端进行验证
+	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+	$data = curl_exec($ch);//运行curl
+	curl_close($ch);
+	return $data;
+}
+function jpush_send($title,$message,$audience,$platform="all",$extras="",$sendno=1) 
+{
+	$url='https://api.jpush.cn/v3/push';
+	$base64=base64_encode("c1edae5a67d1c8018ed822dc:532e12b89db6869641a1a0c5");
+	$header=array("Authorization:Basic $base64","Content-Type:application/json");
+	if($platform=="ios")
+	{//ios的消息是可以透传的，所以只要传输一次就可以了，不需要二次message
+		$param='{"platform":["ios"],"audience":'.$audience.',"notification":{"ios":{"alert":"'.$message.'","sound":"happy","badge":"+1","extras":'.$extras.'}},"message":{"msg_content":"'.$message.'","title":"'.$title.'","extras":'.$extras.'},"options":{"time_to_live":60,"sendno":'.$sendno.'}}';
+	}
+	else if($platform=="android")
+	{//android的消息没有办法透传，所以必须传送两次
+		$param='{"platform":["android"],"audience":'.$audience.',"notification":{"android":{"alert":"'.$message.'","title":"", "builder_id":3,"extras":'.$extras.'}},"message":{"msg_content":"'.$message.'","title":"'.$title.'","extras":'.$extras.'},"options":{"time_to_live":60,"sendno":'.$sendno.'}}';
+	}
+	else if($platform=="all")
+	{//如果是全平台推送的话,进行全部推送，这个时候如果是安卓手机的话就不能进行message透传了，也就是说，应用打开的时候是收不到message参数的
+		$param='{"platform":"all","audience":'.$audience.',"notification":{"ios":{"alert":"'.$message.'","sound":"happy","badge":"+1","extras":'.$extras.'},"android":{"alert":"'.$message.'","title":"", "builder_id":3,"extras":'.$extras.'}},"options":{"time_to_live":60,"sendno":'.$sendno.'}}';
+	}
+	$res=jpush_request_post($url,$param,$header);
+	file_put_contents('1.txt',$res);
+	$res_arr=json_decode($res, true);
+	return $res_arr;
+}

@@ -1,0 +1,1 @@
+{$data.create_time|date='Y',###}-{$data.create_time|date='m',###}-{$data.create_time|date='d',###}

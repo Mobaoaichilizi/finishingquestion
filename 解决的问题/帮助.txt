@@ -1,0 +1,43 @@
+1.自动生成地图：http://api.map.baidu.com/lbsapi/createmap/index.html
+
+
+2.<article:position name="list" cate="66" limit="1" pos="2">  遍历到三级，修改CategoryModel.class.php
+
+
+		foreach ($category['_'] as $key => $value) {
+
+
+
+			$ids[] = $value['id'];
+			
+			if($value['_'])
+			{
+				foreach ($value['_'] as $keyt => $valuet) {
+					$ids[] = $valuet['id'];
+				}
+			}
+
+
+
+		}
+
+
+3.弹出提示框
+function pre_operate(id,status,title){
+    $.deleteForm({
+            prompt:title,
+            url: "{:U('Recipe/pre_operate')}",
+            param: { id: id,status:status},
+            loading : '正在操作中...',
+            success: function () {
+                $.currentWindow().Refresh();
+            }
+      })
+}
+
+4.验证码图片不显示
+
+	估计有其它输出，或BOM头
+	core->library->think->verfiy.class.php   在verifyImg最开始ob_clean();,
+	再检测一下php文件是否是utf-8无BOM
+5.qq链接：tencent://message/?uin=173066315&amp;Site=肥肥网络工作室&amp;Menu=yes

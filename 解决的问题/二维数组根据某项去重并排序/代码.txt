@@ -1,0 +1,9 @@
+$list = array();
+		foreach ($result as $k=>$vo) {
+			$id=intval($vo['member_id']);
+			 	$list[$id]=isset($list[$id])?
+			 			(strtotime($vo['create_time'])>strtotime($list[$id]['create_time']))? $vo:$list[$id] : $vo;
+		}
+		$list=array_values($list);
+		$arr1 = array_map(create_function('$n', 'return $n["create_time"];'), $list);
+		array_multisort($arr1,SORT_DESC,SORT_NUMERIC,$list);

@@ -1,0 +1,139 @@
+<script src="__JS__/UploadImages.js"></script>
+<script type="text/javascript" src="__STATIC__/uploadify/jquery.uploadify.min.js"></script>
+<input type="file" id="upload_picture_imgitem">
+<input type="hidden" name="img_thumb" id="img_thumb"/>
+                        
+                    <script type="text/javascript">
+
+
+                    //上传图片
+
+
+                    /* 初始化上传插件 */
+
+
+                    $("#upload_picture_imgitem").uploadify({
+
+                        "height"          : 30,
+
+                        "swf"             : "__STATIC__/uploadify/uploadify.swf",
+
+                        "fileObjName"     : "download",
+
+                        "buttonText"      : "上传图片",
+
+                        "uploader"        : "{:U('File/uploadPicture',array('session_id'=>session_id()))}",
+
+                        "width"           : 120,
+
+                        'removeTimeout'   : 1,
+
+                        'fileTypeExts'    : '*.jpg; *.png; *.gif;',
+
+                        "onUploadSuccess" : uploadPictureimg,
+                        'onFallback' : function() {
+
+                            alert('未检测到兼容版本的Flash.');
+
+                        }
+
+                    });
+
+                    function uploadPictureimg(file, data){
+                        var data = $.parseJSON(data);
+                        var src = '';
+                        if(data.status){
+                            $("#img_thumb").val(data.data.path);
+                            src = data.data.path;
+                            $("#img_thumb").parent().parent().parent().find('.upload-img-box').html(
+                                '<div class="upload-pre-item"><img src="' + src + '"/></div>'
+                            );
+                        } else {
+                            alert(data.info);
+                        }
+                    }
+
+                    </script>
+
+
+
+
+//多图上传
+
+<input type="file" id="upload_picture_itemimg">
+				<input type="hidden" name="img_item" id="img_item" class="icon imgitem"/>
+						
+		
+                    <script type="text/javascript">
+
+
+					//上传图片
+
+
+				    /* 初始化上传插件 */
+
+
+					$("#upload_picture_itemimg").uploadify({
+
+				        "height"          : 30,
+
+				        "swf"             : "__STATIC__/uploadify/uploadify.swf",
+
+				        "fileObjName"     : "download",
+
+				        "buttonText"      : "上传图片",
+
+				        "uploader"        : "{:U('File/uploadPicture',array('session_id'=>session_id()))}",
+
+				        "width"           : 120,
+
+				        'removeTimeout'	  : 1,
+
+				        'fileTypeExts'	  : '*.jpg; *.png; *.gif;',
+
+				        "onUploadSuccess" : uploadPictureimgitem,
+				        'onFallback' : function() {
+
+				            alert('未检测到兼容版本的Flash.');
+
+				        }
+
+				    });
+				$(document).on("click",'.btn-close-imgitem',function(event){
+					event.preventDefault();
+					$(this).parent().remove();
+					picsbox = $("#upload_picture_itemimg").siblings('.upload-itemimg-box');
+					picArr = [];
+					for (var i = 0; i < picsbox.children().length ; i++) {
+						picArr.push(picsbox.children('.upload-pre-item:eq('+i+')').find('img').attr('src'));
+					};
+					picStr = picArr.join(',');
+					$('.icon.imgitem').val(picStr);
+				});
+				function uploadPictureimgitem(file, data){
+					var data = $.parseJSON(data);
+					var src = '';
+					if(data.status){
+						src = data.data.path;
+						upload_img = "<div class='upload-pre-item'><img src=" + src +" title='点击显示大图'> <span class='btn-close btn-close-imgitem' title='删除图片'></span></div>";
+						picsbox = $("#upload_picture_itemimg").siblings('.upload-itemimg-box');
+						picsbox.append(upload_img)
+						picArr = [];
+						for (var i = 0; i < picsbox.children().length ; i++) {
+							picArr.push(picsbox.children('.upload-pre-item:eq('+i+')').find('img').attr('src'));
+						};
+						picStr = picArr.join(',');
+						$('.icon.imgitem').val(picStr);
+					} else {
+						updateAlert(data.info);
+						setTimeout(function(){
+							$('#top-alert').find('button').click();
+							$(that).removeClass('disabled').prop('disabled',false);
+						},1500);
+					}
+   			 }
+
+					</script>
+                   <div class="upload-itemimg-box">
+						
+					</div>
